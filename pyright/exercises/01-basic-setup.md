@@ -113,17 +113,26 @@ This shows:
 
 ## Part 6: Try Different Strictness Levels
 
-PyRight offers three type checking modes with different levels of strictness. Override the config temporarily to compare:
+PyRight offers three type checking modes with different levels of strictness. To compare them, you need to edit the config file:
 
 ```bash
-# Basic mode (fewer checks)
-pyright --typecheckingmode basic
+# Backup the original config
+cp pyrightconfig.json pyrightconfig.json.backup
 
-# Standard mode (balanced)
-pyright --typecheckingmode standard
+# Try basic mode - edit pyrightconfig.json and change line 4 to:
+# "typeCheckingMode": "basic",
+pyright | tail -2
 
-# Strict mode (all checks, default in our config)
-pyright --typecheckingmode strict
+# Try standard mode - change line 4 to:
+# "typeCheckingMode": "standard",
+pyright | tail -2
+
+# Restore strict mode - change line 4 back to:
+# "typeCheckingMode": "strict",
+pyright | tail -2
+
+# Restore original config
+mv pyrightconfig.json.backup pyrightconfig.json
 ```
 
 ### Type Checking Modes Explained
@@ -157,18 +166,7 @@ pyright --typecheckingmode strict
 
 **For this playground:** We use strict mode to maximize PyRight's workload for realistic performance testing. In your real projects, choose the mode that fits your team's type coverage goals.
 
-Try running all three modes and observe how error counts change:
-
-```bash
-echo "=== Basic Mode ==="
-pyright --typecheckingmode basic | tail -2
-
-echo "=== Standard Mode ==="
-pyright --typecheckingmode standard | tail -2
-
-echo "=== Strict Mode ==="
-pyright --typecheckingmode strict | tail -2
-```
+**Note:** PyRight's type checking mode can only be configured via the config file (`pyrightconfig.json`), not via CLI flags. To compare modes, you need to edit the config file and change the `typeCheckingMode` value.
 
 ## Part 7: JSON Output
 
@@ -187,8 +185,8 @@ This outputs structured data that can be parsed by CI tools.
 | `pyright --version` | Check installation |
 | `pyright` | Run type checking |
 | `pyright --stats` | Show analysis statistics |
-| `pyright --typecheckingmode <mode>` | Override strictness |
 | `pyright --outputjson` | Machine-readable output |
+| Edit `pyrightconfig.json` | Change type checking mode (basic/standard/strict) |
 
 ## Next Exercise
 
