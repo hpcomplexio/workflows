@@ -1,0 +1,131 @@
+# Sample PyRight GitHub Actions Workflow
+#
+# This workflow demonstrates:
+# - Basic type checking with PyRight
+# - Multi-threaded mode for self-hosted runners
+# - Caching for faster incremental runs
+# - JSON output for CI integration
+#
+# Copy this file to your project's .github/workflows/ directory
+# and customize for your needs.
+
+name: Type Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  # Basic type check for GitHub-hosted runners
+  typecheck-hosted:
+    name: Type Check (Hosted)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install PyRight
+        run: pip install pyright
+
+      - name: Cache PyRight
+        uses: actions/cache@v4
+        with:
+          path: .pyright_cache
+          key: pyright-${{ runner.os }}-${{ hashFiles('pyrightconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            pyright-${{ runner.os }}-${{ hashFiles('pyrightconfig.json') }}-
+            pyright-${{ runner.os }}-
+
+      - name: Run type checking
+        run: pyright
+
+  # Multi-threaded type check for self-hosted runners
+  # Uncomment this job if you have self-hosted runners
+  #
+  # typecheck-self-hosted:
+  #   name: Type Check (Self-Hosted, Multi-threaded)
+  #   runs-on: self-hosted  # Replace with your runner label
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ env.PYTHON_VERSION }}
+  #         cache: 'pip'
+  #
+  #     - name: Install PyRight
+  #       run: pip install pyright
+  #
+  #     - name: Show system info
+  #       run: |
+  #         echo "CPU cores: $(nproc)"
+  #         pyright --version
+  #
+  #     - name: Cache PyRight
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: .pyright_cache
+  #         key: pyright-${{ runner.os }}-${{ hashFiles('pyrightconfig.json') }}-${{ github.sha }}
+  #         restore-keys: |
+  #           pyright-${{ runner.os }}-${{ hashFiles('pyrightconfig.json') }}-
+  #           pyright-${{ runner.os }}-
+  #
+  #     - name: Run type checking (multi-threaded)
+  #       run: pyright --threads
+
+  # Benchmark job for comparing single vs multi-threaded
+  # Only runs on manual trigger (workflow_dispatch)
+  benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install PyRight
+        run: pip install pyright
+
+      - name: Show system info
+        run: |
+          echo "=== System Information ==="
+          echo "OS: $(uname -a)"
+          echo "CPU cores: $(nproc)"
+          echo "PyRight version: $(pyright --version)"
+
+      - name: Generate sample code
+        run: python generate_sample_code.py
+        working-directory: pyright
+
+      - name: Benchmark single-threaded
+        run: |
+          echo "=== Single-threaded Benchmark ==="
+          rm -rf .pyright_cache
+          time pyright --stats sample-code/large
+        working-directory: pyright
+
+      - name: Benchmark multi-threaded
+        run: |
+          echo "=== Multi-threaded Benchmark ==="
+          rm -rf .pyright_cache
+          time pyright --threads --stats sample-code/large
+        working-directory: pyright

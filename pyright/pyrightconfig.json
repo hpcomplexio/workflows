@@ -1,0 +1,18 @@
+{
+  "include": ["sample-code"],
+  "exclude": ["**/__pycache__", "**/node_modules"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.11",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportUnusedImport": true,
+  "reportUnusedVariable": true,
+  "reportUnusedFunction": true,
+  "reportDuplicateImport": true,
+  "reportPrivateUsage": true,
+  "reportConstantRedefinition": true,
+  "reportIncompatibleMethodOverride": true,
+  "reportIncompatibleVariableOverride": true,
+  "reportUntypedFunctionDecorator": false,
+  "reportUntypedClassDecorator": false
+}
