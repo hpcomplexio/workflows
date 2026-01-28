@@ -46,6 +46,8 @@ This creates three test codebases:
 - `sample-code/medium/` - ~75 files
 - `sample-code/large/` - ~250 files
 
+**Note:** The playground uses `typeCheckingMode: "strict"` in `pyrightconfig.json`, so you'll see **1000+ type errors** when running PyRight. This is intentional - the synthetic code exercises PyRight's type checking thoroughly for realistic performance testing. Focus on timing and statistics rather than individual errors.
+
 ## Exercises
 
 | # | Exercise | Focus |

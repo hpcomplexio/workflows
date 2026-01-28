@@ -77,11 +77,23 @@ PyRight reports:
 - **Warnings**: Potential issues
 - **Information**: Informational messages
 
-Example output:
+**Note: Errors are Expected!**
+
+You'll see **hundreds of type errors** (1000+ warnings) when running PyRight in strict mode on the synthetic code. This is **intentional and expected** for these reasons:
+
+1. **Exercises PyRight fully** - The type checker does real work beyond just parsing
+2. **Realistic testing** - Real codebases often have type issues
+3. **Better for benchmarking** - Analyzing and reporting errors adds to the workload
+
+The synthetic code was designed to trigger various type checking scenarios, not to be error-free. Focus on the **summary line** and **timing** rather than individual errors.
+
+Example output with errors:
 ```
-Found 3 source files
-pyright 1.1.x
-0 errors, 0 warnings, 0 informations
+Found 19 source files
+/path/to/sample-code/small/models/service_02.py
+  /path/to/sample-code/small/models/service_02.py:20 - error: Return type is partially unknown
+  ... (many more errors) ...
+1020 errors, 0 warnings, 8 informations
 Completed in 1.23s
 ```
 
@@ -101,7 +113,7 @@ This shows:
 
 ## Part 6: Try Different Strictness Levels
 
-Override the config temporarily:
+PyRight offers three type checking modes with different levels of strictness. Override the config temporarily to compare:
 
 ```bash
 # Basic mode (fewer checks)
@@ -110,11 +122,53 @@ pyright --typecheckingmode basic
 # Standard mode (balanced)
 pyright --typecheckingmode standard
 
-# Strict mode (all checks)
+# Strict mode (all checks, default in our config)
 pyright --typecheckingmode strict
 ```
 
-Compare the error counts at each level.
+### Type Checking Modes Explained
+
+| Mode | Error Count | Description | Use Case |
+|------|-------------|-------------|----------|
+| **basic** | ~50-100 errors | Minimal checks, focuses on obvious bugs | Legacy codebases, gradual adoption |
+| **standard** | ~300-500 errors | Balanced checks, enforces most best practices | Production codebases with some types |
+| **strict** | 1000+ errors | All checks enabled, enforces complete typing | New projects, type-complete libraries |
+
+**What each mode checks:**
+
+**Basic mode** checks:
+- Syntax errors
+- Obvious type mismatches (e.g., `int + str`)
+- Undefined variables
+- Import errors
+
+**Standard mode** adds:
+- Function parameter types
+- Return type consistency
+- Generic type arguments
+- Basic protocol/ABC compliance
+
+**Strict mode** additionally requires:
+- All function parameters fully typed
+- All return types explicit
+- No `Any` types (or flag them as unknown)
+- Full type stub coverage for imports
+- Complete type annotations everywhere
+
+**For this playground:** We use strict mode to maximize PyRight's workload for realistic performance testing. In your real projects, choose the mode that fits your team's type coverage goals.
+
+Try running all three modes and observe how error counts change:
+
+```bash
+echo "=== Basic Mode ==="
+pyright --typecheckingmode basic | tail -2
+
+echo "=== Standard Mode ==="
+pyright --typecheckingmode standard | tail -2
+
+echo "=== Strict Mode ==="
+pyright --typecheckingmode strict | tail -2
+```
 
 ## Part 7: JSON Output
 
